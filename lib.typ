@@ -134,8 +134,8 @@
   let body = [#if if-underline [#underline(body)] else [#body]]
   if icon {
     body = [#body#h(typography-font-size-body / 4)#box(
-        fa-icon("external-link", size: 0.7em),
-        baseline: -10%,
+        fa-icon("external-link", size: 0.6em),
+        baseline: -13%,
       )#h(typography-font-size-body / 5)]
   }
   body = [#if if-color [#set text(fill: colors-links);#body] else [#body]]
