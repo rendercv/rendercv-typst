@@ -161,6 +161,7 @@
   let entries-highlights-space-between-bullet-and-text = config.at(
     "entries-highlights-space-between-bullet-and-text",
   )
+  let text-direction = config.at("text-direction", default: "ltr")
 
   let left-space = entries-side-space
   if section-titles-type == "moderncv" {
@@ -174,7 +175,7 @@
     leading: typography-line-spacing,
     justify: justify,
   )
-  set align(left)
+  set align(if text-direction == "rtl" { right } else { left })
   set enum(
     spacing: sections-space-between-text-based-entries + typography-line-spacing,
   )
@@ -235,7 +236,9 @@
     let justify = config.at("justify")
     let typography-date-and-location-column-alignment = config.at("typography-date-and-location-column-alignment")
     let entries-highlights-space-left = config.at("entries-highlights-space-left")
-
+    let text-direction = config.at("text-direction", default: "ltr")
+    let is-rtl = text-direction == "rtl"
+    
     set list(
       marker: (entries-highlights-bullet, entries-highlights-nested-bullet),
       indent: entries-highlights-space-left,
@@ -266,28 +269,35 @@
       {
         if section-titles-type == "moderncv" {
           grid(
-            columns: (entries-date-and-location-width, 1fr),
+            columns: if is-rtl { (1fr, entries-date-and-location-width) } else { (entries-date-and-location-width, 1fr) },
             column-gutter: entries-space-between-columns,
-            align: (typography-date-and-location-column-alignment, left),
-            [
-              #date-and-location-column
-            ],
-            [
+            align: if is-rtl { (right, typography-date-and-location-column-alignment) } else { (typography-date-and-location-column-alignment, left) },
+            if is-rtl { [
               #main-column
 
               #main-column-second-row
-            ],
+            ] } else { [
+              #date-and-location-column
+            ] },
+            if is-rtl { [
+              #date-and-location-column
+            ] } else { [
+              #main-column
+
+              #main-column-second-row
+            ] },
           )
         } else {
           if repr(main-column) != "[ ]" or repr(date-and-location-column) != "[ ]" {
             grid(
-              columns: (1fr, entries-date-and-location-width),
+              columns: if is-rtl { (entries-date-and-location-width, 1fr) } else { (1fr, entries-date-and-location-width) },
               column-gutter: entries-space-between-columns,
-              align: (left, typography-date-and-location-column-alignment),
-              main-column, date-and-location-column,
+              align: if is-rtl { (typography-date-and-location-column-alignment, right) } else { (left, typography-date-and-location-column-alignment) },
+              if is-rtl { date-and-location-column } else { main-column },
+              if is-rtl { main-column } else { date-and-location-column },
             )
           }
-          set align(left)
+          set align(if is-rtl { right } else { left })
           main-column-second-row
         }
       },
@@ -355,6 +365,7 @@
   footer: context { "Page " + str(here().page()) + " of " + str(counter(page).final().first()) + "" },
   top-note: "Last updated in " + datetime.today().display(),
   locale-catalog-language: "en",
+  text-direction: "ltr",
   page-size: "us-letter",
   page-top-margin: 0.7in,
   page-bottom-margin: 0.7in,
@@ -441,6 +452,8 @@
     // Page
     page-left-margin: page-left-margin,
     page-right-margin: page-right-margin,
+    // Text direction
+    text-direction: text-direction,
     // Colors
     colors-body: colors-body,
     colors-name: colors-name,
@@ -541,6 +554,7 @@
     font: typography-font-family-body,
     size: typography-font-size-body,
     lang: locale-catalog-language,
+    dir: if text-direction == "rtl" { rtl } else { ltr },
     hyphenate: hyphenate,
     fill: colors-body,
     // Disable ligatures for better ATS compatibility:
@@ -570,7 +584,7 @@
 
   // Section titles:
   #show heading.where(level: 2): it => [
-    #set align(left)
+    #set align(if text-direction == "rtl" { right } else { left })
     #set text(size: (1em / 1.2)) // reset
     #set text(
       font: typography-font-family-section-titles,
