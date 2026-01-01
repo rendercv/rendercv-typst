@@ -352,6 +352,7 @@
 #let rendercv(
   doc,
   name: "John Doe",
+  title: "John Doe's CV",
   footer: context { "Page " + str(here().page()) + " of " + str(counter(page).final().first()) + "" },
   top-note: "Last updated in " + datetime.today().display(),
   locale-catalog-language: "en",
@@ -513,7 +514,7 @@
   ))
 
   // Metadata:
-  #set document(author: name, title: name + "'s CV", date: date)
+  #set document(author: name, title: title, date: date)
 
   // Page:
   #set page(
