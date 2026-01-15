@@ -14,7 +14,11 @@
   }
 }
 
+// Tracks headline presence to manage spacing between headline and connections
+#let headline-rendered = state("headline-rendered", false)
+
 #let headline(headline) = {
+  headline-rendered.update(true)
   metadata("skip-content-area")
   context {
     let config = rendercv-config.get()
@@ -36,6 +40,7 @@
       width: 100%,
       height: auto,
     )
+    v(header-space-below-headline, weak: true)
   }
 }
 
@@ -58,6 +63,7 @@
     let typography-small-caps-connections = config.at("typography-small-caps-connections")
     let typography-bold-connections = config.at("typography-bold-connections")
     let header-alignment = config.at("header-alignment")
+    let has-headline = headline-rendered.get()
 
     set par(spacing: 0pt, leading: typography-line-spacing * 1.7, justify: false)
     set text(
@@ -75,7 +81,7 @@
     let separator-width = (
       measure(header-connections-separator).width + header-connections-space-between-connections
     )
-    v(header-space-below-name, weak: true)
+    if not has-headline { v(header-space-below-name, weak: true) }
     if connections.pos().len() > 0 {
       set align(header-alignment)
       box(
