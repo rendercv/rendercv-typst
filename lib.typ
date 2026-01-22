@@ -329,7 +329,7 @@
         main-column
       },
       date-and-location-column,
-      main-column-second-row: if main-column-second-row != none {
+      main-column-second-row: if main-column-second-row.fields().len() > 0 {
         [
           #block(
             main-column-second-row,
