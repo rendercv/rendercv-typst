@@ -6,10 +6,13 @@
 // Direction-aware grid: pass content in logical order (start, end).
 // The function handles physical column reversal for RTL.
 #let directional-grid(
-  start-width, end-width,
-  start-align, end-align,
+  start-width,
+  end-width,
+  start-align,
+  end-align,
   gutter,
-  start-cell, end-cell,
+  start-cell,
+  end-cell,
 ) = context {
   let is-rtl = rendercv-config.get().at("is-rtl")
   grid(
@@ -294,8 +297,10 @@
       {
         if section-titles-type == "moderncv" {
           directional-grid(
-            entries-date-and-location-width, 1fr,
-            typography-date-and-location-column-alignment, start-align,
+            entries-date-and-location-width,
+            1fr,
+            typography-date-and-location-column-alignment,
+            start-align,
             entries-space-between-columns,
             [
               #date-and-location-column
@@ -309,10 +314,13 @@
         } else {
           if repr(main-column) != "[ ]" or repr(date-and-location-column) != "[ ]" {
             directional-grid(
-              1fr, entries-date-and-location-width,
-              start-align, typography-date-and-location-column-alignment,
+              1fr,
+              entries-date-and-location-width,
+              start-align,
+              typography-date-and-location-column-alignment,
               entries-space-between-columns,
-              main-column, date-and-location-column,
+              main-column,
+              date-and-location-column,
             )
           }
           set align(start-align)
@@ -344,8 +352,10 @@
     regular-entry(
       if degree-column != none {
         directional-grid(
-          degree-column-width, 1fr,
-          start-align, auto,
+          degree-column-width,
+          1fr,
+          start-align,
+          auto,
           entries-space-between-columns,
           [
             #degree-column
@@ -447,8 +457,8 @@
   entries-short-second-row: false,
   entries-summary-space-left: 0cm,
   entries-summary-space-above: 0.12cm,
-  entries-highlights-bullet:  "•" ,
-  entries-highlights-nested-bullet:  "•" ,
+  entries-highlights-bullet: "•",
+  entries-highlights-nested-bullet: "•",
   entries-highlights-space-left: 0cm,
   entries-highlights-space-above: 0.12cm,
   entries-highlights-space-between-items: 0.12cm,
@@ -632,8 +642,10 @@
       [
         #if section-titles-type == "moderncv" [
           #directional-grid(
-            entries-date-and-location-width + entries-side-space, 1fr,
-            end-align, start-align,
+            entries-date-and-location-width + entries-side-space,
+            1fr,
+            end-align,
+            start-align,
             entries-space-between-columns,
             [
               #align(horizon, box(
