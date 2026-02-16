@@ -169,6 +169,7 @@ The template is highly customizable through parameters passed to `rendercv.with(
   page-right-margin: 0.7in,
   page-show-footer: true,
   page-show-top-note: true,
+  text-direction: ltr,           // or rtl for right-to-left languages
   footer: context {
     "Page " + str(here().page()) + " of " + str(counter(page).final().first())
   },
@@ -284,6 +285,7 @@ The [examples](examples/) directory contains several complete CV examples demons
 - [`engineeringresumes.typ`](examples/engineeringresumes.typ) - Engineering-focused layout
 - [`engineeringclassic.typ`](examples/engineeringclassic.typ) - Classic engineering style
 - [`sb2nov.typ`](examples/sb2nov.typ) - Minimalist design
+- [`rtl.typ`](examples/rtl.typ) - Right-to-left layout (Persian)
 
 Each example shows different parameter combinations to achieve various looks.
 

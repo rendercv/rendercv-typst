@@ -3,6 +3,35 @@
 // State to hold rendercv configuration for use by components
 #let rendercv-config = state("rendercv-config", (:))
 
+// Direction-aware grid: pass content in logical order (start, end).
+// The function handles physical column reversal for RTL.
+#let directional-grid(
+  start-width, end-width,
+  start-align, end-align,
+  gutter,
+  start-cell, end-cell,
+) = context {
+  let is-rtl = rendercv-config.get().at("is-rtl")
+  grid(
+    columns: if is-rtl { (end-width, start-width) } else { (start-width, end-width) },
+    column-gutter: gutter,
+    align: if is-rtl { (end-align, start-align) } else { (start-align, end-align) },
+    if is-rtl { end-cell } else { start-cell },
+    if is-rtl { start-cell } else { end-cell },
+  )
+}
+
+// Direction-aware inset: maps logical start/end to physical left/right.
+// Must be called from within a `context` scope.
+#let directional-inset(start: 0cm, end: 0cm) = {
+  let is-rtl = rendercv-config.get().at("is-rtl")
+  if is-rtl {
+    (left: end, right: start)
+  } else {
+    (left: start, right: end)
+  }
+}
+
 #let headline(headline) = {
   metadata("skip-content-area")
   context {
@@ -161,11 +190,12 @@
   let entries-highlights-space-between-bullet-and-text = config.at(
     "entries-highlights-space-between-bullet-and-text",
   )
+  let start-align = config.at("start-align")
 
-  let left-space = entries-side-space
+  let start-space = entries-side-space
   if section-titles-type == "moderncv" {
-    left-space = (
-      left-space + entries-date-and-location-width + entries-space-between-columns
+    start-space = (
+      start-space + entries-date-and-location-width + entries-space-between-columns
     )
   }
 
@@ -174,7 +204,7 @@
     leading: typography-line-spacing,
     justify: justify,
   )
-  set align(left)
+  set align(start-align)
   set enum(
     spacing: sections-space-between-text-based-entries + typography-line-spacing,
   )
@@ -189,10 +219,7 @@
     content,
     breakable: entries-allow-page-break,
     below: sections-space-between-text-based-entries + typography-line-spacing,
-    inset: (
-      left: left-space,
-      right: entries-side-space,
-    ),
+    inset: directional-inset(start: start-space, end: entries-side-space),
     width: 100%,
   )
 }
@@ -205,7 +232,7 @@
     let typography-line-spacing = config.at("typography-line-spacing")
     block(
       summary,
-      inset: (left: entries-summary-space-left),
+      inset: directional-inset(start: entries-summary-space-left),
       above: entries-summary-space-above + typography-line-spacing,
     )
   }
@@ -235,6 +262,7 @@
     let justify = config.at("justify")
     let typography-date-and-location-column-alignment = config.at("typography-date-and-location-column-alignment")
     let entries-highlights-space-left = config.at("entries-highlights-space-left")
+    let start-align = config.at("start-align")
 
     set list(
       marker: (entries-highlights-bullet, entries-highlights-nested-bullet),
@@ -265,10 +293,10 @@
     block(
       {
         if section-titles-type == "moderncv" {
-          grid(
-            columns: (entries-date-and-location-width, 1fr),
-            column-gutter: entries-space-between-columns,
-            align: (typography-date-and-location-column-alignment, left),
+          directional-grid(
+            entries-date-and-location-width, 1fr,
+            typography-date-and-location-column-alignment, start-align,
+            entries-space-between-columns,
             [
               #date-and-location-column
             ],
@@ -280,14 +308,14 @@
           )
         } else {
           if repr(main-column) != "[ ]" or repr(date-and-location-column) != "[ ]" {
-            grid(
-              columns: (1fr, entries-date-and-location-width),
-              column-gutter: entries-space-between-columns,
-              align: (left, typography-date-and-location-column-alignment),
+            directional-grid(
+              1fr, entries-date-and-location-width,
+              start-align, typography-date-and-location-column-alignment,
+              entries-space-between-columns,
               main-column, date-and-location-column,
             )
           }
-          set align(left)
+          set align(start-align)
           main-column-second-row
         }
       },
@@ -308,16 +336,17 @@
   context {
     let config = rendercv-config.get()
     let entries-space-between-columns = config.at("entries-space-between-columns")
+    let start-align = config.at("start-align")
 
     // Fixed width for degree column (GPA, etc.)
     let degree-column-width = 1cm
 
     regular-entry(
       if degree-column != none {
-        grid(
-          columns: (degree-column-width, 1fr),
-          column-gutter: entries-space-between-columns,
-          align: (left, auto),
+        directional-grid(
+          degree-column-width, 1fr,
+          start-align, auto,
+          entries-space-between-columns,
           [
             #degree-column
           ],
@@ -333,9 +362,8 @@
         [
           #block(
             main-column-second-row,
-            inset: (
-              left: if degree-column != none { degree-column-width + entries-space-between-columns } else { 0cm },
-              right: 0cm,
+            inset: directional-inset(
+              start: if degree-column != none { degree-column-width + entries-space-between-columns } else { 0cm },
             ),
           )
         ]
@@ -356,6 +384,7 @@
   footer: context { "Page " + str(here().page()) + " of " + str(counter(page).final().first()) + "" },
   top-note: "Last updated in " + datetime.today().display(),
   locale-catalog-language: "en",
+  text-direction: ltr,
   page-size: "us-letter",
   page-top-margin: 0.7in,
   page-bottom-margin: 0.7in,
@@ -436,9 +465,16 @@
     "justified-with-no-hyphenation": (true, false),
   ).at(typography-alignment)
 
+  #let is-rtl = text-direction == rtl
+  #let start-align = if is-rtl { right } else { left }
+  #let end-align = if is-rtl { left } else { right }
 
   // Initialize state with all configuration parameters
   #rendercv-config.update((
+    // Direction
+    text-direction: text-direction,
+    is-rtl: is-rtl,
+    start-align: start-align,
     // Page
     page-left-margin: page-left-margin,
     page-right-margin: page-right-margin,
@@ -542,6 +578,7 @@
     font: typography-font-family-body,
     size: typography-font-size-body,
     lang: locale-catalog-language,
+    dir: text-direction,
     hyphenate: hyphenate,
     fill: colors-body,
     // Disable ligatures for better ATS compatibility:
@@ -571,7 +608,7 @@
 
   // Section titles:
   #show heading.where(level: 2): it => [
-    #set align(left)
+    #set align(start-align)
     #set text(size: (1em / 1.2)) // reset
     #set text(
       font: typography-font-family-section-titles,
@@ -594,10 +631,10 @@
       width: 100%,
       [
         #if section-titles-type == "moderncv" [
-          #grid(
-            columns: (entries-date-and-location-width + entries-side-space, 1fr),
-            column-gutter: entries-space-between-columns,
-            align: (right, left),
+          #directional-grid(
+            entries-date-and-location-width + entries-side-space, 1fr,
+            end-align, start-align,
+            entries-space-between-columns,
             [
               #align(horizon, box(
                 width: 1fr,
@@ -628,9 +665,9 @@
 
   // Top note:
   #if page-show-top-note and top-note != none and top-note != "" {
-    let dx = -entries-side-space
+    let dx = if is-rtl { entries-side-space } else { -entries-side-space }
     place(
-      top + right,
+      top + end-align,
       dy: -page-top-margin / 2,
       dx: dx,
       text(
