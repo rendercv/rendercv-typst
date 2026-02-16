@@ -352,7 +352,7 @@
         main-column
       },
       date-and-location-column,
-      main-column-second-row: if main-column-second-row != none {
+      main-column-second-row: if main-column-second-row != none and repr(main-column-second-row) != "[ ]" {
         [
           #block(
             main-column-second-row,
