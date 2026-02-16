@@ -144,7 +144,17 @@
 
   let body = [#if if-underline [#underline(body)] else [#body]]
   if icon {
-    let ext-icon = box(fa-icon("external-link", size: 0.6em), baseline: -13%)
+    let ext-icon-content = fa-icon("external-link", size: 0.65em)
+    let icon-width = measure(ext-icon-content).width
+    // Zero-height box reserves horizontal space but doesn't affect line height
+    // or baseline. place() renders the icon out of flow, positioned above the
+    // baseline to align visually with text.
+    let ext-icon = box(
+      width: icon-width,
+      height: 0pt,
+      baseline: 0pt,
+      place(dy: -0.75em, ext-icon-content),
+    )
     // Wrap body in box to create BiDi isolation — the box becomes a neutral
     // atomic inline, so the paragraph direction controls the icon's placement.
     body = [#box[#body]#h(typography-font-size-body / 4)#ext-icon]
