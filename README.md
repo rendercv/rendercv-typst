@@ -5,13 +5,13 @@ A CV/resume template for Typst with extensive customization options.
 ## Installation
 
 ```typst
-#import "@preview/rendercv:0.1.0": *
+#import "@preview/rendercv:0.2.0": *
 ```
 
 ## Quick Start
 
 ```typst
-#import "@preview/rendercv:0.1.0": *
+#import "@preview/rendercv:0.2.0": *
 
 #show: rendercv.with(
   name: "John Doe",

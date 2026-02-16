@@ -1,4 +1,4 @@
-#import "@preview/rendercv:0.1.0": *
+#import "@preview/rendercv:0.2.0": *
 
 #show: rendercv.with(
   name: "John Doe",

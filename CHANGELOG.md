@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## 0.2.0 - 2025-02-16
 
 ### Added
 
@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - `title` parameter to customize the PDF document title.
 - Persian RTL example (`examples/rtl.typ`).
 
-## [0.1.0] - 2025-12-05
+## 0.1.0 - 2025-12-05
 
 - Initial release of RenderCV Typst package.
+
