@@ -3,27 +3,6 @@
 // State to hold rendercv configuration for use by components
 #let rendercv-config = state("rendercv-config", (:))
 
-// Direction-aware grid: pass content in logical order (start, end).
-// The function handles physical column reversal for RTL.
-#let directional-grid(
-  start-width,
-  end-width,
-  start-align,
-  end-align,
-  gutter,
-  start-cell,
-  end-cell,
-) = context {
-  let is-rtl = rendercv-config.get().at("is-rtl")
-  grid(
-    columns: if is-rtl { (end-width, start-width) } else { (start-width, end-width) },
-    column-gutter: gutter,
-    align: if is-rtl { (end-align, start-align) } else { (start-align, end-align) },
-    if is-rtl { end-cell } else { start-cell },
-    if is-rtl { start-cell } else { end-cell },
-  )
-}
-
 // Direction-aware inset: maps logical start/end to physical left/right.
 // Must be called from within a `context` scope.
 #let directional-inset(start: 0cm, end: 0cm) = {
@@ -165,17 +144,19 @@
 
   let body = [#if if-underline [#underline(body)] else [#body]]
   if icon {
-    body = [#body#h(typography-font-size-body / 4)#box(
-        fa-icon("external-link", size: 0.6em),
-        baseline: -13%,
-      )#h(typography-font-size-body / 5)]
+    let ext-icon = box(fa-icon("external-link", size: 0.6em), baseline: -13%)
+    // Wrap body in box to create BiDi isolation — the box becomes a neutral
+    // atomic inline, so the paragraph direction controls the icon's placement.
+    body = [#box[#body]#h(typography-font-size-body / 4)#ext-icon]
   }
   body = [#if if-color [#set text(fill: colors-links);#body] else [#body]]
   original-link(dest, body)
 }
 
+// Box around body creates BiDi isolation — the icon and body are both neutral
+// atomic inlines, so the paragraph direction controls their relative order.
 #let connection-with-icon(icon-name, body) = [
-  #fa-icon(icon-name, size: 0.9em) #h(0.05cm) #body
+  #fa-icon(icon-name, size: 0.9em) #h(0.05cm) #box[#body]
 ]
 
 #let content-area(content) = context {
@@ -296,12 +277,10 @@
     block(
       {
         if section-titles-type == "moderncv" {
-          directional-grid(
-            entries-date-and-location-width,
-            1fr,
-            typography-date-and-location-column-alignment,
-            start-align,
-            entries-space-between-columns,
+          grid(
+            columns: (entries-date-and-location-width, 1fr),
+            column-gutter: entries-space-between-columns,
+            align: (typography-date-and-location-column-alignment, start-align),
             [
               #date-and-location-column
             ],
@@ -313,14 +292,11 @@
           )
         } else {
           if repr(main-column) != "[ ]" or repr(date-and-location-column) != "[ ]" {
-            directional-grid(
-              1fr,
-              entries-date-and-location-width,
-              start-align,
-              typography-date-and-location-column-alignment,
-              entries-space-between-columns,
-              main-column,
-              date-and-location-column,
+            grid(
+              columns: (1fr, entries-date-and-location-width),
+              column-gutter: entries-space-between-columns,
+              align: (start-align, typography-date-and-location-column-alignment),
+              main-column, date-and-location-column,
             )
           }
           set align(start-align)
@@ -351,12 +327,10 @@
 
     regular-entry(
       if degree-column != none {
-        directional-grid(
-          degree-column-width,
-          1fr,
-          start-align,
-          auto,
-          entries-space-between-columns,
+        grid(
+          columns: (degree-column-width, 1fr),
+          column-gutter: entries-space-between-columns,
+          align: (start-align, auto),
           [
             #degree-column
           ],
@@ -641,12 +615,10 @@
       width: 100%,
       [
         #if section-titles-type == "moderncv" [
-          #directional-grid(
-            entries-date-and-location-width + entries-side-space,
-            1fr,
-            end-align,
-            start-align,
-            entries-space-between-columns,
+          #grid(
+            columns: (entries-date-and-location-width + entries-side-space, 1fr),
+            column-gutter: entries-space-between-columns,
+            align: (end-align, start-align),
             [
               #align(horizon, box(
                 width: 1fr,
